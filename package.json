@@ -1,0 +1,9 @@
+{
+  "name": "cesium-ptiles",
+  "version": "1.0.0",
+  "main": "src/index.mjs",
+  "license": "MIT",
+  "dependencies": {
+    "csv": "^6.3.11"
+  }
+}
