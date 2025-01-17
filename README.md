@@ -1,6 +1,10 @@
 # cesium-vector-data-tiles
 
+Convert GeoNames cities datasource into Cesium VectorData tileset
+
 https://github.com/CesiumGS/3d-tiles/tree/vctr/TileFormats/VectorData
+
+## Geonames data structure
 
 ```
 The main 'geoname' table has the following fields :
