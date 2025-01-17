@@ -10,8 +10,11 @@ https://download.geonames.org/export/dump/cities500.zip to `data/cities500.txt`
 Download and unpackage Cesium into `lib/cesium_1_124`
 
 ```bash
+# Run
 node src/server.mjs
 ```
+
+open `localhost:8089` zoom in closer to some city
 
 ## Geonames data structure
 
