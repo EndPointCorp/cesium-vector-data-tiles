@@ -1,11 +1,17 @@
 # cesium-vector-data-tiles
 
 Convert GeoNames cities datasource into Cesium VectorData tileset
+https://github.com/CesiumGS/3d-tiles/tree/vctr/TileFormats/VectorData
 
 ## Run
+Download and unpack `cities500.txt` from 
+https://download.geonames.org/export/dump/cities500.zip to `data/cities500.txt`
 
+Download and unpackage Cesium into `lib/cesium_1_124`
 
-https://github.com/CesiumGS/3d-tiles/tree/vctr/TileFormats/VectorData
+```bash
+node src/server.mjs
+```
 
 ## Geonames data structure
 
