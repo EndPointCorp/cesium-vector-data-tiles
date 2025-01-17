@@ -1,3 +1,5 @@
-data/
-lib/
+data/*
+!data/pnts-implicit.json
+
+lib/*
 node_modules/

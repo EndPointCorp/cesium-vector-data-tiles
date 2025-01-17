@@ -2,6 +2,9 @@
 
 Convert GeoNames cities datasource into Cesium VectorData tileset
 
+## Run
+
+
 https://github.com/CesiumGS/3d-tiles/tree/vctr/TileFormats/VectorData
 
 ## Geonames data structure
