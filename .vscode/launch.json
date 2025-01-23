@@ -7,11 +7,21 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Server",
+            "name": "serve",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/server.mjs"
+            "program": "${workspaceFolder}/src/index.mjs",
+            "args": ["serve"]
+        }, {
+            "type": "node",
+            "request": "launch",
+            "name": "export",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/index.mjs",
+            "args": ["export"]
         }
     ]
 }

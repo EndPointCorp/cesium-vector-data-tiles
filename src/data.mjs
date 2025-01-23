@@ -2,7 +2,24 @@ import fs from 'fs';
 import { parse } from 'csv-parse';
 import { QTree } from './qtree.mjs';
 
-export async function readData(filePath) {
+export function getDataPath(...files) {
+    const pth = process.argv[1].split('/').filter(p => p != '');
+    pth.pop();
+    pth.pop();
+    pth.push('data');
+
+    if (files) {
+        pth.push(...files);
+    }
+
+    return '/' + pth.join('/');
+}
+
+export const scoreF = (cty) => {
+    return cty.ppl;
+};
+
+export async function readData(filePath, onCityNode) {
 
     const ID_FLD = 0;
     const ASCII_NAME_FLD = 2;
@@ -25,11 +42,6 @@ export async function readData(filePath) {
     const rowsAsync = fs.createReadStream(filePath)
       .pipe(parse(parseOptions));
     
-    const scoreF = (cty) => {
-        return cty.ppl;
-    };
-
-    const tree = new QTree({scoreF, minDepth: 3});
     
     for await (const row of rowsAsync) {
         const id = parseInt(row[ID_FLD]);
@@ -43,15 +55,10 @@ export async function readData(filePath) {
     
         const ppl = parseInt(row[PPL_FLD] || 0);
     
-        const node = {
+        onCityNode({
             id, clazz, name,
             lat, lon, ele, ppl
-        };
+        }, cls);
     
-        if (cls === 'P') {
-            tree.insert(node);
-        }
     }
-    
-    return tree;
 }

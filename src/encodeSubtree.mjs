@@ -3,13 +3,6 @@ import { traverseZMortonOrder } from "./qtree.mjs";
 import {lenb, padStr, BufferWrtitableStream} from "./binutil.mjs"
 
 // see: https://github.com/CesiumGS/3d-tiles/blob/main/specification/ImplicitTiling/README.adoc
-function encodeAvailability(availability) {
-    const bitBuf = new BitStream();
-    for (const a of availability) {
-        bitBuf.push(a === '1');
-    }
-    return bitBuf.asUint8Array();
-}
 
 export function encodeSubtree(tile, depth) {
 

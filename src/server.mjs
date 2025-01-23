@@ -3,37 +3,21 @@ import url from 'url';
 import http from 'http';
 import path from 'path';
 import { mimeType } from "./mimetype.mjs"
-import { readData } from "./stlmnts.mjs"
-import { num2box } from "./qtree.mjs"
+import { readData, getDataPath, scoreF } from "./data.mjs"
+import { num2box, QTree } from "./qtree.mjs"
 import { encodeTile, Rectangle, Cartographic } from "./encodeTile.mjs"
 import { encodeSubtree } from './encodeSubtree.mjs';
 
 
-export function getDataPath(file) {
-    const pth = process.argv[1].split('/').filter(p => p != '');
-    pth.pop();
-    pth.pop();
-    pth.push('data');
+export async function startServer(options) {
+    const {host = 'localhost', port=8089} = options || {};
+    const dataPath = options?.data || getDataPath('cities500.txt');
 
-    if (file) {
-        pth.push(file);
-    }
-
-    return '/' + pth.join('/');
-}
-
-
-const port = 8089;
-const host = '0.0.0.0';
-
-async function startServer() {
-
-    const dataPath = getDataPath('cities500.txt');
-    console.log('read data', dataPath);
-    const data = await readData(dataPath);
+    const dataTree = new QTree({scoreF, minDepth: 3});
+    await readData(dataPath, (n, cls) => cls === 'P' && dataTree.insert(n));
 
     var depth = 0;
-    data.traverseBFS(tile => {
+    dataTree.traverseBFS(tile => {
         if (tile.z > depth) {
             depth = tile.z;
         }
@@ -58,7 +42,7 @@ async function startServer() {
                 parseInt(contentTmsMatch[3])
             ];
             const cityPoints = [];
-            const tile = data.collectPointsForTile({x, y, z}, cityPoints);
+            const tile = dataTree.collectPointsForTile({x, y, z}, cityPoints);
 
             const tbb = num2box(x, y, z);
             const rectangle = new Rectangle(tbb.minx, tbb.miny, tbb.maxx, tbb.maxy);
@@ -87,7 +71,7 @@ async function startServer() {
 
             console.log(`get ${z}.${x}.${y} subtree`);
 
-            const tile = data.traverseToTile({x, y, z});
+            const tile = dataTree.traverseToTile({x, y, z});
             if (!tile) {
                 response.statusCode = 404;
                 response.end(`File ${pathname} not found!`);
@@ -132,5 +116,3 @@ async function startServer() {
         console.log(`Server is running on http://${host}:${port}`);
     });
 }
-
-startServer();

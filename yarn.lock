@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+commander@^13.0.0:
+  version "13.0.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-13.0.0.tgz#1b161f60ee3ceb8074583a0f95359a4f8701845c"
+  integrity sha512-oPYleIY8wmTVzkvQq10AEok6YcTC4sRUBl8F9gVuwchGVUCTbl/vhLTaQqutuuySYOsu8YTgV+OxKc/8Yvx+mQ==
+
 csv-generate@^4.4.2:
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/csv-generate/-/csv-generate-4.4.2.tgz#001d7eda4993a72d24f73e15c9b9d7b251af8a2e"
@@ -31,3 +36,8 @@ stream-transform@^3.3.3:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/stream-transform/-/stream-transform-3.3.3.tgz#d130bfed33739de6ef190a8f06cc8ad1b4c1635a"
   integrity sha512-dALXrXe+uq4aO5oStdHKlfCM/b3NBdouigvxVPxCdrMRAU6oHh3KNss20VbTPQNQmjAHzZGKGe66vgwegFEIog==
+
+typescript@^5.7.3:
+  version "5.7.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.7.3.tgz#919b44a7dbb8583a9b856d162be24a54bf80073e"
+  integrity sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==

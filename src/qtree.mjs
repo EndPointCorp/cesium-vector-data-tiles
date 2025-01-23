@@ -57,7 +57,7 @@ export class QTree {
             }
         }
 
-        itraverse(self.root)
+        itraverse(self.root);
     }
 
     traverseBFS(visitor) {
