@@ -54,7 +54,7 @@ export async function readData(filePath, onCityNode) {
         const ele = parseInt(row[ELE_FLD] || 0);
     
         const ppl = parseInt(row[PPL_FLD] || 0);
-    
+
         onCityNode({
             id, clazz, name,
             lat, lon, ele, ppl

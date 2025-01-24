@@ -11,21 +11,24 @@ export async function exportTiles(options) {
     console.log('read data', dataPath);
 
     // Right now this works for refine: ADD
-    const dataTree = new QTree({scoreF, minDepth: 3});
+    const dataTree = new QTree({scoreF, minDepth: 1});
     await readData(dataPath, (n, cls) => cls === 'P' && dataTree.insert(n));
 
     var filesWritten = 0;
     const visitor = (leaf, points) => {
-        if (points?.length > 0) {
-            const {x, y, z} = leaf;
+        const {x, y, z} = leaf;
+        const tbb = num2box(x, y, z);
+        const tilePoints = points?.filter(p => tbb.contains(p.lon, p.lat));
+
+        if (tilePoints?.length > 0) {
             const outPath = getDataPath('content', `${z}__${x}_${y}.vctr`);
-            writeTile({x, y, z}, points, outPath);
+            writeTile({x, y, z}, tilePoints, outPath);
             filesWritten++;
         }
     };
 
     const rIterator = (leaf, collector) => {
-        const collectedPoints = [...collector, leaf.points];
+        const collectedPoints = [...collector, ...leaf.points];
         visitor(leaf, collectedPoints);
 
         for (const chld of leaf.children) {
@@ -57,7 +60,7 @@ export async function exportTiles(options) {
 
     rSubtreeTraverse(dataTree.root);
 
-    console.log('subtree files written', filesWritten);
+    console.log('subtree files written', subtreeFilesWritten);
 
 }
 

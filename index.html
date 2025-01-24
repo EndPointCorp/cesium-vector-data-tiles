@@ -26,7 +26,7 @@
       Viewer, Ion, Ellipsoid, 
       Cesium3DTileStyle, Cesium3DTileset, 
       VerticalOrigin, HorizontalOrigin, Cartographic, 
-      BoundingSphere, HeadingPitchRange,
+      BoundingSphere, HeadingPitchRange, LabelStyle,
       TileCoordinatesImageryProvider
     } from "/lib/cesium_1_124/Build/CesiumUnminified/index.js"
 
@@ -45,7 +45,9 @@
           pointSize: "1.0",
           color: "rgba(10, 180, 255, 0.77)",
           labelColor: "rgba(180, 180, 255, 1)",
-          labelOutlineColor: "rgba(180, 180, 255, 1)",
+          labelOutlineWidth: 4,
+          labelStyle: LabelStyle.FILL_AND_OUTLINE,
+          labelOutlineColor: "color('black')",
           labelOutlineWidth: "1.0",
           labelHorizontalOrigin: HorizontalOrigin.CENTER,
           pixelOffset: "[0, -15]",
@@ -53,6 +55,9 @@
           heightOffset: "500.0",
           anchorLineColor: "rgba(255, 255, 255, 1)",
           verticalOrigin: VerticalOrigin.BOTTOM,
+          distanceDisplayCondition: "vec2(0.0, 5.5e6)",
+          // disableDepthTestDistance: 100000,
+          translucencyByDistance: "vec4(10000, 0,  20000, 1)",
           font: '"30px sans-serif"',
           labelText: '"${title}"',
       });

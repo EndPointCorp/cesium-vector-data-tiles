@@ -3,7 +3,7 @@
         "version": "1.0"
     },
     "root": {
-        "geometricError": 4096,
+        "geometricError": 2048,
         "refine": "REPLACE",
         "boundingVolume": {
             "region": [

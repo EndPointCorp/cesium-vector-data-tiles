@@ -86,6 +86,8 @@ export async function startServer(options) {
             response.write(buff, undefined, () => {
                 response.end();
             });
+
+            return;
         }
 
         if (!fs.existsSync(pathname)) {
@@ -99,7 +101,7 @@ export async function startServer(options) {
             pathname += '/index.html';
         }
 
-        fs.readFile(pathname, function(err, data){
+        fs.readFile(pathname, function(err, data) {
             if(err){
                 response.statusCode = 500;
                 response.end(`Error getting the file: ${err}.`);
