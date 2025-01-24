@@ -50,7 +50,9 @@ export class Cartographic {
     }
 }
 
-export function encodeTile(rectangle, cartoPositions, titles) {
+// https://github.com/CesiumGS/3d-tiles/tree/vctr/TileFormats/VectorData
+
+export function encodeTile(rectangle, cartoPositions, titles, sizes) {
     const version = 1;
     const maxHeight = 10000.0;
     const minHeight = 0.0;
@@ -71,7 +73,10 @@ export function encodeTile(rectangle, cartoPositions, titles) {
     const featureTableJSONPad = padStr(featureTableHdrJSON);
 
     const batchTableHdr = {
-        title: titles
+        title: titles,
+    };
+    if (sizes) {
+        batchTableHdr['size'] = sizes;
     }
     const batchTableHdrJSON = JSON.stringify(batchTableHdr);
     const batchTableHdrPad = padStr(batchTableHdrJSON);

@@ -79,8 +79,9 @@ function writeTile({x, y, z}, cityPoints, outPath) {
     const rectangle = new Rectangle(tbb.minx, tbb.miny, tbb.maxx, tbb.maxy);
     const cartoPositions = cityPoints.map(p => Cartographic.fromDegrees(p.lon, p.lat, p.ele));
     const titles = cityPoints.map(p => p.name);
+    const sizes = cityPoints.map(p => p.ppl);
 
-    const buff = encodeTile(rectangle, cartoPositions, titles);
+    const buff = encodeTile(rectangle, cartoPositions, titles, sizes);
 
     writeFileSync(outPath, buff, err => {
         if (err) console.error(err);
