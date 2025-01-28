@@ -55,10 +55,68 @@ export async function readData(filePath, onCityNode) {
     
         const ppl = parseInt(row[PPL_FLD] || 0);
 
-        onCityNode({
+        const cityNode = {
             id, clazz, name,
             lat, lon, ele, ppl
-        }, cls);
-    
+        };
+
+        cityNode['size'] = getCitySize(cityNode);
+
+        onCityNode(cityNode, cls);
     }
+}
+
+export function getCitySize({clazz, ppl, name}) {
+    // Capitals
+    if (clazz === 'PPLC') {
+        return 10;
+    }
+
+    switch (clazz) {
+        case 'PPLA': return 9;
+        case 'PPL2': return 8;
+        case 'PPL3': return 7;
+        case 'PPL4': return 6;
+        case 'PPL5': return 5;
+    }
+
+    const population = ppl || 0;
+
+    if (population >= 1_000_000) {
+        return 9;
+    }
+    
+    if (population >= 500_000) {
+        return 9;
+    }
+    
+    if (population >= 200_000) {
+        return 8;
+    }
+    
+    if (population >= 100_000) {
+        return 7;
+    }
+    
+    if (population >= 50_000) {
+        return 6;
+    }
+    
+    if (population >= 20_000) {
+        return 5;
+    }
+    
+    if (population >= 10_000) {
+        return 4;
+    }
+    
+    if (population >= 5_000) {
+        return 3;
+    }
+    
+    if (population >= 1_000) {
+        return 2;
+    }
+
+    return 1;
 }

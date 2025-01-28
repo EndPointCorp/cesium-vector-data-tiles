@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs';
-import { getDataPath, readData, scoreF } from "./data.mjs";
+import { getCitySize, getDataPath, readData, scoreF } from "./data.mjs";
 import { num2box, QTree, traverseZMortonOrder } from './qtree.mjs';
 import { Cartographic, encodeTile, Rectangle } from './encodeTile.mjs';
 import { encodeSubtree } from './encodeSubtree.mjs';
@@ -78,8 +78,13 @@ function writeTile({x, y, z}, cityPoints, outPath) {
     const tbb = num2box(x, y, z);
     const rectangle = new Rectangle(tbb.minx, tbb.miny, tbb.maxx, tbb.maxy);
     const cartoPositions = cityPoints.map(p => Cartographic.fromDegrees(p.lon, p.lat, p.ele));
-    const titles = cityPoints.map(p => p.name);
-    const sizes = cityPoints.map(p => p.ppl);
+
+    const titles = cityPoints.map(p => p.name).filter(name => name !== undefined);
+    const sizes = cityPoints.map(p => p.size).filter(size => size !== undefined);
+
+    if (titles.length !== sizes.length || sizes.length !== cityPoints.length) {
+        console.log('Wrong length');
+    }
 
     const buff = encodeTile(rectangle, cartoPositions, titles, sizes);
 

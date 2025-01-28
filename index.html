@@ -27,17 +27,27 @@
       Cesium3DTileStyle, Cesium3DTileset, 
       VerticalOrigin, HorizontalOrigin, Cartographic, 
       BoundingSphere, HeadingPitchRange, LabelStyle,
-      TileCoordinatesImageryProvider
-    } from "https://cesium.com/downloads/cesiumjs/releases/1.124/Build/CesiumUnminified/index.js"
+      TileCoordinatesImageryProvider,
+      createDefaultImageryProviderViewModels
+    } 
+    from "https://cesium.com/downloads/cesiumjs/releases/1.124/Build/CesiumUnminified/index.js"
+    // from "/lib/Cesium/Build/CesiumUnminified/index.js"
 
     Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyYzRjNzYyYi1kMTUzLTRmMjUtYjA2My04NjJmN2U4NGRhOWMiLCJpZCI6MTEwMzQ1LCJpYXQiOjE3MDE3OTQ3Mjd9.c3YxZQaQVpQyVab1-trMHGNMXsTaMJ_GB305G_OPsrk';
 
-    const viewer = new Viewer('cesiumContainer', {});
-    //viewer.imageryLayers.addImageryProvider(new TileCoordinatesImageryProvider());
+    const models = createDefaultImageryProviderViewModels();
+    const esriWorldImagery = models.find(p => p.name === 'ArcGIS World Imagery');
+
+    const viewer = new Viewer('cesiumContainer', {
+      selectedImageryProviderViewModel: esriWorldImagery,
+      imageryProviderViewModels: models
+    });
 
     await addTileset();
 
-    flyTo();
+    setTimeout(() => {
+      flyTo();
+    }, 1000);
 
     async function addTileset() {
 
@@ -54,9 +64,8 @@
           anchorLineEnabled: "true",
           heightOffset: "500.0",
           anchorLineColor: "rgba(255, 255, 255, 1)",
+          distanceDisplayCondition: "vec2(10000, 1e8)",
           verticalOrigin: VerticalOrigin.BOTTOM,
-          distanceDisplayCondition: "vec2(0.0, 5.5e8)",
-          // disableDepthTestDistance: 100000,
           translucencyByDistance: "vec4(10000, 0,  20000, 1)",
           font: '"30px sans-serif"',
           labelText: '"${title} (${size})"',
@@ -72,10 +81,10 @@
     }
 
     function flyTo() {
-      const position = Ellipsoid.WGS84.cartographicToCartesian(Cartographic.fromDegrees(0.0, 0.0, 0.0));
+      const position = Ellipsoid.WGS84.cartographicToCartesian(Cartographic.fromDegrees(-74.0564, 40.7284, 0.0));
       viewer.scene.camera.flyToBoundingSphere(
           new BoundingSphere(position, 0.0), {
-              offset: new HeadingPitchRange(0.0, -3.14159 / 4, 5000000)
+              offset: new HeadingPitchRange(0.0, -3.14159 / 4, 200000)
           });
     }
     

@@ -72,6 +72,7 @@ export function encodeTile(rectangle, cartoPositions, titles, sizes) {
     const featureTableHdrJSON = JSON.stringify(featureTableHdr);
     const featureTableJSONPad = padStr(featureTableHdrJSON);
 
+    // https://github.com/CesiumGS/3d-tiles/blob/vctr/TileFormats/BatchTable/README.md
     const batchTableHdr = {
         title: titles,
     };

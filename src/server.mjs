@@ -48,7 +48,7 @@ export async function startServer(options) {
             const rectangle = new Rectangle(tbb.minx, tbb.miny, tbb.maxx, tbb.maxy);
             const cartoPositions = cityPoints.map(p => Cartographic.fromDegrees(p.lon, p.lat, p.ele));
             const titles = cityPoints.map(p => p.name);
-            const sizes = cityPoints.map(p => p.ppl);
+            const sizes = cityPoints.map(p => p.size);
 
             const buff = encodeTile(rectangle, cartoPositions, titles, sizes);
 

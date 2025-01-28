@@ -40,6 +40,7 @@ The main 'geoname' table has the following fields :
 19  modification date : date of last modification in yyyy-MM-dd format
 ```
 
+City node clazz values
 ```
 PPL 	populated place	a city, town, village, or other agglomeration of buildings where people live and work
 PPLA	seat of a first-order administrative division	seat of a first-order administrative division (PPLC takes precedence over PPLA)
