@@ -3,16 +3,29 @@
 Convert GeoNames cities datasource into Cesium VectorData tileset
 https://github.com/CesiumGS/3d-tiles/tree/vctr/TileFormats/VectorData
 
-## Run
+## Get data
 Download and unpack `cities500.txt` from 
 https://download.geonames.org/export/dump/cities500.zip to `data/cities500.txt`
 
+## Run serve
 ```bash
-# Run
 node src/index.mjs serve
 ```
 
-open `localhost:8089` zoom in closer to some city
+open `http://localhost:8089`
+
+## Export data
+```bash
+node src/index.mjs export
+```
+
+run any kind of a web server in the root directory of the project eg
+```bash
+http-server
+```
+
+open `http://localhost:8080`
+
 
 ## Geonames data structure
 
