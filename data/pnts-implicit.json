@@ -3,7 +3,7 @@
         "version": "1.0"
     },
     "root": {
-        "geometricError": 2048,
+        "geometricError": 200000,
         "refine": "REPLACE",
         "boundingVolume": {
             "region": [
@@ -20,7 +20,7 @@
         },
         "implicitTiling": {
             "subdivisionScheme": "QUADTREE",
-            "availableLevels": 15,
+            "availableLevels": 18,
             "subtreeLevels": 3,
             "subtrees": {
                 "uri": "subtrees/{level}.{x}.{y}.subtree"
