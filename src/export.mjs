@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import { getCitySize, getDataPath, readData, scoreF } from "./data.mjs";
 import { num2box, QTree, traverseZMortonOrder } from './qtree.mjs';
 import { Cartographic, encodeTile, Rectangle } from './encodeTile.mjs';
@@ -12,15 +12,41 @@ export async function exportTiles(options) {
 
     // Right now this works for refine: ADD
     const dataTree = new QTree({scoreF, minDepth: 1});
-    await readData(dataPath, (n, cls) => cls === 'P' && dataTree.insert(n));
+    await readData(dataPath, (n, cls) => {
+        if (cls === 'P') {
+            const size = getCitySize(n);
+            if (size >= 9) {
+                dataTree.insert(n);
+            }
+            else if (size >= 8) {
+                dataTree.insert(n, 6);
+            }
+            else if (size >= 6) {
+                dataTree.insert(n, 12);
+            }
+            else if (size >= 4) {
+                dataTree.insert(n, 16);
+            }
+            else if (size >= 3) {
+                dataTree.insert(n, 18);
+            }
+            // Discard small places
+        }
+    });
+
+    const contentOutPath = getDataPath('content');
+    if (!existsSync(contentOutPath)){
+        mkdirSync(contentOutPath, { recursive: true });
+    }
 
     var filesWritten = 0;
+    var maxLevel = 0;
     const visitor = (leaf, points) => {
         const {x, y, z} = leaf;
         const tbb = num2box(x, y, z);
         const tilePoints = points?.filter(p => tbb.contains(p.lon, p.lat));
-
         if (tilePoints?.length > 0) {
+            maxLevel = z > maxLevel ? z : maxLevel;
             const outPath = getDataPath('content', `${z}__${x}_${y}.vctr`);
             writeTile({x, y, z}, tilePoints, outPath);
             filesWritten++;
@@ -39,6 +65,12 @@ export async function exportTiles(options) {
     rIterator(dataTree.root, []);
 
     console.log('content files written', filesWritten);
+    console.log('levels available', maxLevel);
+
+    const subtreesOutPath = getDataPath('subtrees');
+    if (!existsSync(subtreesOutPath)){
+        mkdirSync(subtreesOutPath, { recursive: true });
+    }
 
     // Process subtrees
     var subtreeFilesWritten = 0;

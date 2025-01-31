@@ -30,8 +30,8 @@
       TileCoordinatesImageryProvider,
       createDefaultImageryProviderViewModels
     } 
-    from "https://cesium.com/downloads/cesiumjs/releases/1.124/Build/CesiumUnminified/index.js"
     // from "/lib/Cesium/Build/CesiumUnminified/index.js"
+    from "https://cesium.com/downloads/cesiumjs/releases/1.124/Build/CesiumUnminified/index.js"
 
     Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyYzRjNzYyYi1kMTUzLTRmMjUtYjA2My04NjJmN2U4NGRhOWMiLCJpZCI6MTEwMzQ1LCJpYXQiOjE3MDE3OTQ3Mjd9.c3YxZQaQVpQyVab1-trMHGNMXsTaMJ_GB305G_OPsrk';
 
@@ -46,14 +46,17 @@
     await addTileset();
 
     setTimeout(() => {
-      flyTo();
+      //flyTo();
     }, 1000);
 
     async function addTileset() {
 
+      // const response = await fetch("/data/city-labels-style.json");
+      // const styleJson = await response.json();
+
       const style = new Cesium3DTileStyle({
           pointSize: "1.0",
-          color: "rgba(10, 180, 255, 0.77)",
+          color: "rgba(10, 180, 255, 1)",
           labelColor: "rgba(180, 180, 255, 1)",
           labelOutlineWidth: 4,
           labelStyle: LabelStyle.FILL_AND_OUTLINE,
@@ -62,13 +65,29 @@
           labelHorizontalOrigin: HorizontalOrigin.CENTER,
           pixelOffset: "[0, -15]",
           anchorLineEnabled: "true",
-          heightOffset: "500.0",
+          heightOffset: {
+            conditions: [
+              ['${size} >= 9', '1000'],
+              ['${size} >= 7', '600'],
+              ['${size} >= 5', '250'],
+              ['${size} >= 3', '100'],
+              ['true', '50']
+            ]
+          },
           anchorLineColor: "rgba(255, 255, 255, 1)",
           distanceDisplayCondition: "vec2(10000, 1e8)",
           verticalOrigin: VerticalOrigin.BOTTOM,
           translucencyByDistance: "vec4(10000, 0,  20000, 1)",
-          font: '"30px sans-serif"',
-          labelText: '"${title} (${size})"',
+          font: {
+            conditions: [
+              ['${size} >= 9', '"22px sans-serif"'],
+              ['${size} >= 7', '"18px sans-serif"'],
+              ['${size} >= 5', '"14px sans-serif"'],
+              ['${size} >= 3', '"10px sans-serif"'],
+              ['true', '"6px sans-serif"']
+            ]
+          },
+          labelText: '"${title}"',
       });
       
       // const tseturl = '/data/pnts-tileset.json';
@@ -87,6 +106,59 @@
               offset: new HeadingPitchRange(0.0, -3.14159 / 4, 200000)
           });
     }
+
+    // function testRgx() {
+    //   var variableRegex = /\${(.*?)}/g;
+
+    //   let result = "${title} ${size}";
+
+    //   const varPlaceholders = [];
+
+    //   variableRegex.lastIndex = 0;
+    //   let match = variableRegex.exec(result);
+    //   while (match !== null) {
+    //     const placeholder = match[0];
+    //     const variableName = match[1];
+        
+    //     varPlaceholders.push({placeholder, variableName});
+
+    //     match = variableRegex.exec(result);
+    //   }
+
+    //   for (const varPlaceholder of varPlaceholders) {
+    //     const {placeholder, variableName} = varPlaceholder;
+
+    //     let property = {title: "London", size: 10}[variableName];
+    //     if (!property) {
+    //       property = "";
+    //     }
+    //     result = result.replace(placeholder, property);
+    //   }
+
+    //   console.log(result);
+    // }
+
+    // function testRgx() {
+    // var variableRegex = /\${(.*?)}/g;
+
+    // let result = "${string} ${num}";
+    // let match = variableRegex.exec(result);
+    // while (match !== null) {
+    //     console.log(variableRegex.lastIndex);
+    //     const placeholder = match[0];
+    //     const variableName = match[1];
+    //     let property = {string: "abc", num: 10}[variableName];
+    //     if (!property) {
+    //       property = "";
+    //     }
+    //     result = result.replace(placeholder, property);
+    //     variableRegex.lastIndex += (property.length - placeholder.length);
+    //     match = variableRegex.exec(result);
+    //   }
+    //   console.log(result);
+    // }
+
+    // window.testRgx = testRgx;
     
 
   </script>

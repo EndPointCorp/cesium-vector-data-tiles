@@ -1,30 +1,4 @@
 
-export function test() {
-    // NYC 12 40.7089 -73.9122
-
-    const nycPoint = {lat: 40.7089, lon: -73.9122, score: 0};
-    console.log(nycPoint);
-
-    console.log(num2box(2048, 2048, 12));
-    console.log(num2box(2047, 2047, 12));
-
-    for (let i = 0; i <= 12; i++) {
-        const xy = deg2num(nycPoint, i);
-        const box = num2box(xy.xtile, xy.ytile, i);
-
-        console.log(i, xy, box);
-    }
-
-    const tree = new QTree({minDepth: 12});
-    tree.insert(nycPoint);
-
-    const target = tree.traverseToTile({x: 1207, y: 2974, z: 12}, t => {
-        console.log('traverse via', t);
-    });
-
-    console.log(target);
-}
-
 export class QTree {
 
     constructor(_options) {
@@ -34,10 +8,10 @@ export class QTree {
         this.scoreF = options.scoreF || ((p) => p.score);
         this.minDepth = options.minDepth;
 
-        this.root = new Leaf({x: 0, y: 0, z: 0}, [], this.threshold, this.minDepth);
+        this.root = new Leaf({x: 0, y: 0, z: 0}, [], this.threshold, this.scoreF);
     }
 
-    insert(point) {
+    insert(point, minDepth) {
         if (typeof this.scoreF !== 'function') {
             throw Error('scoreF is not a function');
         }
@@ -46,7 +20,9 @@ export class QTree {
             throw Error('Point coordinates are out of bounds');
         }
 
-        this.root.insert(point, this.scoreF);
+        minDepth = minDepth ?? this.minDepth ?? 0;
+
+        this.root.insert(point, minDepth);
     }
     
     traverseDFS(visitor) {
@@ -181,36 +157,36 @@ export class QTree {
 
 class Leaf {
 
-    constructor(xyz, points, threshold, minDepth) {
+    constructor(xyz, points, capacity, scoreF) {
         this.x = xyz.x;
         this.y = xyz.y;
         this.z = xyz.z;
 
         this.bbox = num2box(this.x, this.y, this.z);
 
-        this.minDepth = minDepth;
-        this.threshold = threshold || 10;
+        this.scoreF = scoreF;
+        this.capacity = capacity || 10;
 
         this.points = points;
         this.children = [];
     }
 
-    insert(point, scoreF) {
-        if (this.z >= this.minDepth) {
-            this.addSorted(point, scoreF);
-            while (this.points.length > this.threshold) {
-                this.insertChild(this.points.pop(), scoreF);
+    insert(point, minDepth = 0) {
+        if (this.z >= minDepth) {
+            this.addSorted(point);
+            while (this.points.length > this.capacity) {
+                this.insertChild(this.points.pop(), minDepth);
             }
         }
         else {
-            this.insertChild(point, scoreF);
+            this.insertChild(point, minDepth);
         }
     }
     
-    insertChild(point, scoreF) {
+    insertChild(point, minDepth) {
         const {xtile, ytile} = deg2num(point, this.z + 1);
         
-        this.getOrCreateChild(xtile, ytile).insert(point, scoreF);
+        this.getOrCreateChild(xtile, ytile).insert(point, minDepth);
     }
 
     getOrCreateChild(x, y) {
@@ -220,7 +196,7 @@ class Leaf {
         }
 
         const leaf = new Leaf({x, y, z: this.z + 1}, 
-            [], this.threshold, this.minDepth);
+            [], this.capacity, this.scoreF);
 
         this.children.push(leaf);
         return leaf;
@@ -230,10 +206,10 @@ class Leaf {
         return this.children.find(c => c.x === x && c.y === y);
     }
 
-    addSorted(point, scoreF) {
-        const inScore = scoreF(point);
+    addSorted(point) {
+        const inScore = this.scoreF(point);
 
-        const inx = this.points.findIndex(pnt => inScore > scoreF(pnt));
+        const inx = this.points.findIndex(pnt => inScore > this.scoreF(pnt));
         if (inx >= 0) {
             this.points.splice(inx, 0, point);
         }

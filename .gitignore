@@ -1,5 +1,6 @@
 data/*
 !data/pnts-implicit.json
+!data/*style*.json
 
 lib/*
 !lib/Cesium
