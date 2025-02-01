@@ -40,7 +40,8 @@
 
     const viewer = new Viewer('cesiumContainer', {
       selectedImageryProviderViewModel: esriWorldImagery,
-      imageryProviderViewModels: models
+      imageryProviderViewModels: models,
+      msaaSamples: 1
     });
 
     await addTileset();
@@ -56,22 +57,22 @@
 
       const style = new Cesium3DTileStyle({
           pointSize: "1.0",
-          color: "rgba(10, 180, 255, 1)",
-          labelColor: "rgba(180, 180, 255, 1)",
-          labelOutlineWidth: 4,
+          // labelColor: "rgba(180, 180, 255, 1)",
+          labelColor: "rgba(146, 146, 252, 1)",
+          disableDepthTestDistance: "1000.0",
           labelStyle: LabelStyle.FILL_AND_OUTLINE,
           labelOutlineColor: "color('black')",
-          labelOutlineWidth: "1.0",
+          labelOutlineWidth: "2.0",
           labelHorizontalOrigin: HorizontalOrigin.CENTER,
           pixelOffset: "[0, -15]",
           anchorLineEnabled: "true",
           heightOffset: {
             conditions: [
-              ['${size} >= 9', '1000'],
-              ['${size} >= 7', '600'],
-              ['${size} >= 5', '250'],
-              ['${size} >= 3', '100'],
-              ['true', '50']
+              ['${size} >= 9', '2500'],
+              ['${size} >= 7', '1200'],
+              ['${size} >= 5', '600'],
+              ['${size} >= 3', '250'],
+              ['true', '100']
             ]
           },
           anchorLineColor: "rgba(255, 255, 255, 1)",
@@ -80,11 +81,11 @@
           translucencyByDistance: "vec4(10000, 0,  20000, 1)",
           font: {
             conditions: [
-              ['${size} >= 9', '"22px sans-serif"'],
-              ['${size} >= 7', '"18px sans-serif"'],
-              ['${size} >= 5', '"14px sans-serif"'],
+              ['${size} >= 9', '"18px sans-serif"'],
+              ['${size} >= 7', '"15px sans-serif"'],
+              ['${size} >= 5', '"12px sans-serif"'],
               ['${size} >= 3', '"10px sans-serif"'],
-              ['true', '"6px sans-serif"']
+              ['true', '"8px sans-serif"']
             ]
           },
           labelText: '"${title}"',

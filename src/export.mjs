@@ -1,36 +1,104 @@
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import { getCitySize, getDataPath, readData, scoreF } from "./data.mjs";
-import { num2box, QTree, traverseZMortonOrder } from './qtree.mjs';
+import { deg2num, num2box, QTree, traverseZMortonOrder } from './qtree.mjs';
 import { Cartographic, encodeTile, Rectangle } from './encodeTile.mjs';
 import { encodeSubtree } from './encodeSubtree.mjs';
 
 const SUBTREE_DEPTH = 3;
+
+// Distance between points at level 0
+// 60 degrees is roughly the width of USA
+const BASE_DISTANCE_TRESHOLD = 30.0;
+
+const TARGET_DEPTH = 16;
+
+function llDistance(a, b) {
+    const dx = a.lon - b.lon;
+    const dy = a.lat - b.lat;
+
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+function findClosest(points, point) {
+    let closest;
+    let dist = Number.POSITIVE_INFINITY;
+
+    for (const p of points) {
+        const d = llDistance(p, point);
+        if (d < dist) {
+            closest = p;
+            dist = d;
+        }
+    }
+
+    return {closest, dist};
+}
+
+function distanceInserter(leaf, cityPoint, minDepth = 0) {
+
+    const level = leaf.z;
+    const forceInsert = leaf.z >= TARGET_DEPTH;
+
+    if (level < minDepth && !forceInsert) {
+        // We're not deep enough, skip distance calculations and go to child
+        const {xtile, ytile} = deg2num(cityPoint, leaf.z + 1);
+        distanceInserter(leaf.getOrCreateChild(xtile, ytile), cityPoint, minDepth);
+        return;
+    }
+
+    const {closest, dist} = findClosest(leaf.points, cityPoint);
+
+    const threshold = BASE_DISTANCE_TRESHOLD / (1 << level);
+
+    if (dist > threshold || forceInsert) {
+        leaf.addSorted(cityPoint);
+        while (leaf.points.length > leaf.capacity) {
+            const pop = leaf.points.pop();
+            const {xtile, ytile} = deg2num(pop, leaf.z + 1);
+
+            distanceInserter(leaf.getOrCreateChild(xtile, ytile), pop, minDepth);
+        }
+    }
+    // There is a point close enough to the one we are inserting
+    else if (closest) {
+        
+        // How many times should we divide threshold, so it becomes
+        // smaller than distance
+        let targetDepth = level + 1;
+        while ((BASE_DISTANCE_TRESHOLD / (1 << targetDepth)) > dist && targetDepth <= 16) {
+            targetDepth++;
+        }
+
+        if (scoreF(closest) > scoreF(cityPoint)) {
+            const {xtile, ytile} = deg2num(cityPoint, leaf.z + 1);
+
+            distanceInserter(leaf.getOrCreateChild(xtile, ytile), cityPoint, targetDepth);
+        }
+        else {
+            // Point to insert is more important (bigger) than Point in a tree
+            // replace it 
+            const inx = leaf.points.indexOf(closest);
+            console.assert(inx >= 0, "Can't find index of existing point");
+         
+            const pop = leaf.points[inx];
+            leaf.points[inx] = cityPoint;
+
+            const {xtile, ytile} = deg2num(pop, leaf.z + 1);
+
+            distanceInserter(leaf.getOrCreateChild(xtile, ytile), pop, targetDepth);
+        }
+    }
+}
 
 export async function exportTiles(options) {
     const dataPath = options.data || getDataPath('cities500.txt');
     console.log('read data', dataPath);
 
     // Right now this works for refine: ADD
-    const dataTree = new QTree({scoreF, minDepth: 1});
+    const dataTree = new QTree({scoreF, minDepth: 1, pointsPerNode: 20});
     await readData(dataPath, (n, cls) => {
         if (cls === 'P') {
-            const size = getCitySize(n);
-            if (size >= 9) {
-                dataTree.insert(n);
-            }
-            else if (size >= 8) {
-                dataTree.insert(n, 6);
-            }
-            else if (size >= 6) {
-                dataTree.insert(n, 12);
-            }
-            else if (size >= 4) {
-                dataTree.insert(n, 16);
-            }
-            else if (size >= 3) {
-                dataTree.insert(n, 18);
-            }
-            // Discard small places
+            distanceInserter(dataTree.root, n, 0);
         }
     });
 

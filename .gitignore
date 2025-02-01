@@ -2,6 +2,6 @@ data/*
 !data/pnts-implicit.json
 !data/*style*.json
 
-lib/*
+lib/cesium_*
 !lib/Cesium
 node_modules/

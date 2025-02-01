@@ -16,10 +16,6 @@ export class QTree {
             throw Error('scoreF is not a function');
         }
 
-        if (Math.abs(point.lat) > 90.0 || Math.abs(point.lon) > 180.0) {
-            throw Error('Point coordinates are out of bounds');
-        }
-
         minDepth = minDepth ?? this.minDepth ?? 0;
 
         this.root.insert(point, minDepth);
@@ -124,35 +120,6 @@ export class QTree {
         return this.traverseToTile({x, y, z}, collector);
     }
     
-    getBoxPoints(box, maxPoints) {
-        const points = []
-        const d = (box.maxx - box.minx) * 0.2;
-
-        const collector = (point, node) => {
-            let cluster = false
-            const lon1 = point.lon;
-            const lat1 = point.lat;
-            for (p of points) {
-                const lon2 = p.lon; 
-                const lat2 = p.lat;
-                if (distanceDegree(lon1, lat1, lon2, lat2) < d) {
-                    cluster = true
-                    break
-                }
-            }
-            
-            if (!cluster) {
-                points.push(point);
-            }
-
-            if (maxPoints !== undefined && points.length >= maxPoints) {
-                return true
-            }
-        }
-
-        this.traverseByBox(box, collector);
-        return points;
-    }
 }
 
 class Leaf {
@@ -182,10 +149,9 @@ class Leaf {
             this.insertChild(point, minDepth);
         }
     }
-    
+
     insertChild(point, minDepth) {
         const {xtile, ytile} = deg2num(point, this.z + 1);
-        
         this.getOrCreateChild(xtile, ytile).insert(point, minDepth);
     }
 
@@ -286,7 +252,7 @@ export function num2box(x, y, zoom) {
     return new Box(west, south, west + wdth, south + hgth);
 }
 
-function num2deg(xtile, ytile, zoom) {
+export function num2deg(xtile, ytile, zoom) {
     const n = Math.pow(2, zoom);
 
     const wdth = 360.0 / n;
@@ -298,20 +264,13 @@ function num2deg(xtile, ytile, zoom) {
     return {lat: lat_deg, lon: lon_deg}
 }
 
-function deg2num({lat: lat_deg, lon: lon_deg}, zoom) {
+export function deg2num({lat: lat_deg, lon: lon_deg}, zoom) {
     const n = Math.pow(2, zoom);
 
     const xtile = Math.floor((lon_deg + 180.0) / (360.0 / n));
     const ytile = Math.floor((lat_deg + 90.0 ) / (180.0 / n));
 
     return { xtile, ytile };
-}
-
-function distanceDegree(lon1, lat1, lon2, lat2) {
-    const dx = lon1 - lon2;
-    const dy = lat1 - lat2;
-
-    return Math.sqrt(dx * dx + dy * dy);
 }
 
 function todeg(angle) {
