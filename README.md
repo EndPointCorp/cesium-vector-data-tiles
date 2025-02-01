@@ -7,6 +7,11 @@ https://github.com/CesiumGS/3d-tiles/tree/vctr/TileFormats/VectorData
 Download and unpack `cities500.txt` from 
 https://download.geonames.org/export/dump/cities500.zip to `data/cities500.txt`
 
+## Install dependancies
+```bash
+yarn
+```
+
 ## Run serve
 ```bash
 node src/index.mjs serve
