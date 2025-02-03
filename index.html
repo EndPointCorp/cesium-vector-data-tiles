@@ -33,7 +33,8 @@
     // from "/lib/Cesium/Build/CesiumUnminified/index.js"
     from "https://cesium.com/downloads/cesiumjs/releases/1.124/Build/CesiumUnminified/index.js"
 
-    Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyYzRjNzYyYi1kMTUzLTRmMjUtYjA2My04NjJmN2U4NGRhOWMiLCJpZCI6MTEwMzQ1LCJpYXQiOjE3MDE3OTQ3Mjd9.c3YxZQaQVpQyVab1-trMHGNMXsTaMJ_GB305G_OPsrk';
+    const TSET_URL = "/data/pnts-implicit.json";
+    const TSET_STYLE_URL = "/data/city-labels-style.json";
 
     const models = createDefaultImageryProviderViewModels();
     const esriWorldImagery = models.find(p => p.name === 'ArcGIS World Imagery');
@@ -46,121 +47,16 @@
 
     await addTileset();
 
-    setTimeout(() => {
-      //flyTo();
-    }, 1000);
-
     async function addTileset() {
+      const response = await fetch(TSET_STYLE_URL);
+      const styleJson = await response.json();
+      const style = new Cesium3DTileStyle(styleJson);
 
-      // const response = await fetch("/data/city-labels-style.json");
-      // const styleJson = await response.json();
-
-      const style = new Cesium3DTileStyle({
-          pointSize: "1.0",
-          // labelColor: "rgba(180, 180, 255, 1)",
-          labelColor: "rgba(146, 146, 252, 1)",
-          disableDepthTestDistance: "1000.0",
-          labelStyle: LabelStyle.FILL_AND_OUTLINE,
-          labelOutlineColor: "color('black')",
-          labelOutlineWidth: "2.0",
-          labelHorizontalOrigin: HorizontalOrigin.CENTER,
-          pixelOffset: "[0, -15]",
-          anchorLineEnabled: "true",
-          heightOffset: {
-            conditions: [
-              ['${size} >= 9', '2500'],
-              ['${size} >= 7', '1200'],
-              ['${size} >= 5', '600'],
-              ['${size} >= 3', '250'],
-              ['true', '100']
-            ]
-          },
-          anchorLineColor: "rgba(255, 255, 255, 1)",
-          distanceDisplayCondition: "vec2(10000, 1e8)",
-          verticalOrigin: VerticalOrigin.BOTTOM,
-          translucencyByDistance: "vec4(10000, 0,  20000, 1)",
-          font: {
-            conditions: [
-              ['${size} >= 9', '"18px sans-serif"'],
-              ['${size} >= 7', '"15px sans-serif"'],
-              ['${size} >= 5', '"12px sans-serif"'],
-              ['${size} >= 3', '"10px sans-serif"'],
-              ['true', '"8px sans-serif"']
-            ]
-          },
-          labelText: '"${title}"',
-      });
-      
-      // const tseturl = '/data/pnts-tileset.json';
-      const tseturl = '/data/pnts-implicit.json';
-      const tset = await Cesium3DTileset.fromUrl(tseturl);
+      const tset = await Cesium3DTileset.fromUrl(TSET_URL);
 
       viewer.scene.primitives.add(tset);
       tset.style = style;
-
     }
-
-    function flyTo() {
-      const position = Ellipsoid.WGS84.cartographicToCartesian(Cartographic.fromDegrees(-74.0564, 40.7284, 0.0));
-      viewer.scene.camera.flyToBoundingSphere(
-          new BoundingSphere(position, 0.0), {
-              offset: new HeadingPitchRange(0.0, -3.14159 / 4, 200000)
-          });
-    }
-
-    // function testRgx() {
-    //   var variableRegex = /\${(.*?)}/g;
-
-    //   let result = "${title} ${size}";
-
-    //   const varPlaceholders = [];
-
-    //   variableRegex.lastIndex = 0;
-    //   let match = variableRegex.exec(result);
-    //   while (match !== null) {
-    //     const placeholder = match[0];
-    //     const variableName = match[1];
-        
-    //     varPlaceholders.push({placeholder, variableName});
-
-    //     match = variableRegex.exec(result);
-    //   }
-
-    //   for (const varPlaceholder of varPlaceholders) {
-    //     const {placeholder, variableName} = varPlaceholder;
-
-    //     let property = {title: "London", size: 10}[variableName];
-    //     if (!property) {
-    //       property = "";
-    //     }
-    //     result = result.replace(placeholder, property);
-    //   }
-
-    //   console.log(result);
-    // }
-
-    // function testRgx() {
-    // var variableRegex = /\${(.*?)}/g;
-
-    // let result = "${string} ${num}";
-    // let match = variableRegex.exec(result);
-    // while (match !== null) {
-    //     console.log(variableRegex.lastIndex);
-    //     const placeholder = match[0];
-    //     const variableName = match[1];
-    //     let property = {string: "abc", num: 10}[variableName];
-    //     if (!property) {
-    //       property = "";
-    //     }
-    //     result = result.replace(placeholder, property);
-    //     variableRegex.lastIndex += (property.length - placeholder.length);
-    //     match = variableRegex.exec(result);
-    //   }
-    //   console.log(result);
-    // }
-
-    // window.testRgx = testRgx;
-    
 
   </script>
 
