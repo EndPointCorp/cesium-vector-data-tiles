@@ -6,14 +6,12 @@
   "repository": "git@github.com:EndPointCorp/cesium-vector-data-tiles.git",
   "author": "<dmitry.v.kiselev@gmail.com>",
   "scripts": {
-    "deploy": "gh-pages --src '{data/*,index.html}' --dist ."
   },
   "dependencies": {
     "commander": "^13.0.0",
     "csv": "^6.3.11"
   },
   "devDependencies": {
-    "gh-pages": "^6.3.0",
     "typescript": "^5.7.3"
   }
 }
