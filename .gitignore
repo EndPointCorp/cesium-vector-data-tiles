@@ -1,4 +1,5 @@
 data/*
+data/cities*.txt
 !data/pnts-implicit.json
 !data/*style*.json
 
