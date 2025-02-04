@@ -1,0 +1,3 @@
+[submodule "lib/Cesium"]
+	path = lib/Cesium
+	url = git@github.com:CesiumGS/cesium.git

@@ -1,0 +1,4 @@
+{
+    "javascript.updateImportsOnPaste.enabled": false,
+    "typescript.updateImportsOnPaste.enabled": false
+}

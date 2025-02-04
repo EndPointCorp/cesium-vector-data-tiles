@@ -1,0 +1,30 @@
+{
+    "asset": {
+        "version": "1.0"
+    },
+    "root": {
+        "geometricError": 200000,
+        "refine": "REPLACE",
+        "boundingVolume": {
+            "region": [
+                -3.14159265358,
+                -1.57079632679,
+                3.14159265358,
+                1.57079632679,
+                0,
+                100000
+            ]
+        },
+        "content": {
+            "uri": "content/{level}__{x}_{y}.vctr"
+        },
+        "implicitTiling": {
+            "subdivisionScheme": "QUADTREE",
+            "availableLevels": 18,
+            "subtreeLevels": 3,
+            "subtrees": {
+                "uri": "subtrees/{level}.{x}.{y}.subtree"
+            }
+        }
+    }
+}
