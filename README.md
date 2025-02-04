@@ -3,6 +3,8 @@
 Convert GeoNames cities datasource into Cesium VectorData tileset
 https://github.com/CesiumGS/3d-tiles/tree/vctr/TileFormats/VectorData
 
+Live demo https://endpointcorp.github.io/cesium-vector-data-tiles/
+
 ## Get data
 Download and unpack `cities500.txt` from 
 https://download.geonames.org/export/dump/cities500.zip to `data/cities500.txt`
