@@ -3,7 +3,7 @@ import url from 'url';
 import http from 'http';
 import path from 'path';
 import { mimeType } from "./mimetype.mjs"
-import { readData, getDataPath, scoreF } from "./data.mjs"
+import { readData, getDataPath, scoreF, getCitySize } from "./data.mjs"
 import { num2box, QTree } from "./qtree.mjs"
 import { encodeTile, Rectangle, Cartographic } from "./encodeTile.mjs"
 import { encodeSubtree } from './encodeSubtree.mjs';
@@ -13,8 +13,27 @@ export async function startServer(options) {
     const {host = 'localhost', port=8089} = options || {};
     const dataPath = options?.data || getDataPath('cities500.txt');
 
-    const dataTree = new QTree({scoreF, minDepth: 3});
-    await readData(dataPath, (n, cls) => cls === 'P' && dataTree.insert(n));
+    const dataTree = new QTree({scoreF, minDepth: 1});
+    await readData(dataPath, (n, cls) => {
+        if (n.name === 'The Bronx' || n.name === 'Baltimore') {
+            console.log(n);
+        }
+        if (cls === 'P') {
+            const size = getCitySize(n);
+            if (size <= 3) {
+                dataTree.insert(n, 14);
+            }
+            else if (size <= 5) {
+                dataTree.insert(n, 10);
+            }
+            else if (size <= 3) {
+                dataTree.insert(n, 6);
+            }
+            else {
+                dataTree.insert(n);
+            }
+        }
+    });
 
     var depth = 0;
     dataTree.traverseBFS(tile => {

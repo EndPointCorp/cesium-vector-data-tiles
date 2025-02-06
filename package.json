@@ -6,6 +6,7 @@
   "repository": "git@github.com:EndPointCorp/cesium-vector-data-tiles.git",
   "author": "<dmitry.v.kiselev@gmail.com>",
   "scripts": {
+    "export": "node src/index.mjs export"
   },
   "dependencies": {
     "commander": "^13.0.0",

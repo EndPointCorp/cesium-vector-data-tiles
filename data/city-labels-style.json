@@ -1,6 +1,6 @@
 {
     "pointSize": 1.0,
-    "labelColor": "rgba(146, 146, 252, 1)",
+    "labelColor": "rgba(255, 255, 255, 1)",
     "disableDepthTestDistance": 1000.0,
     "labelStyle": 2,
     "labelOutlineColor": "color('black')",
