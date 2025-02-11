@@ -177,7 +177,7 @@ function writeTile({x, y, z}, cityPoints, outPath) {
 
     const tbb = num2box(x, y, z);
     const rectangle = new Rectangle(tbb.minx, tbb.miny, tbb.maxx, tbb.maxy);
-    const cartoPositions = cityPoints.map(p => Cartographic.fromDegrees(p.lon, p.lat, p.ele));
+    const positions = cityPoints.map(p => Cartographic.fromDegrees(p.lon, p.lat, p.ele));
 
     const titles = cityPoints.map(p => p.name).filter(name => name !== undefined);
     const sizes = cityPoints.map(p => p.size).filter(size => size !== undefined);
@@ -186,7 +186,22 @@ function writeTile({x, y, z}, cityPoints, outPath) {
         console.log('Wrong length');
     }
 
-    const buff = encodeTile(rectangle, cartoPositions, titles, sizes);
+    const points = {
+        positions,
+        length: cityPoints.length,
+    }
+
+    const attributes = [{
+        propertyName: "title",
+        values: titles,
+        binary: false
+    }, {
+        propertyName: "size",
+        values: sizes,
+        binary: false
+    }];
+
+    const buff = encodeTile(rectangle, attributes, {points});
 
     writeFileSync(outPath, buff, err => {
         if (err) console.error(err);

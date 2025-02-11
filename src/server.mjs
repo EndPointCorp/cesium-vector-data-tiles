@@ -8,16 +8,13 @@ import { num2box, QTree } from "./qtree.mjs"
 import { encodeTile, Rectangle, Cartographic } from "./encodeTile.mjs"
 import { encodeSubtree } from './encodeSubtree.mjs';
 
+const DATASETS = {};
 
-export async function startServer(options) {
-    const {host = 'localhost', port=8089} = options || {};
+async function loadData(options) {
     const dataPath = options?.data || getDataPath('cities500.txt');
 
     const dataTree = new QTree({scoreF, minDepth: 1});
     await readData(dataPath, (n, cls) => {
-        if (n.name === 'The Bronx' || n.name === 'Baltimore') {
-            console.log(n);
-        }
         if (cls === 'P') {
             const size = getCitySize(n);
             if (size <= 3) {
@@ -44,6 +41,14 @@ export async function startServer(options) {
 
     console.log('tree depth', depth);
 
+    DATASETS['labels'] = dataTree;
+}
+
+export async function startServer(options) {
+    const {host = 'localhost', port=8089} = options || {};
+
+    await loadData(options);
+
     const basePath = path.normalize(process.cwd());
     console.log('basePath', basePath);
 
@@ -53,59 +58,30 @@ export async function startServer(options) {
         const sanitizePath = path.normalize(parsedUrl.pathname).replace(/^(\.\.[\/\\])+/, '');
         let pathname = path.join(basePath, sanitizePath);
 
-        const contentTmsMatch = /content\/([0-9]+)__([0-9]+)_([0-9]+)\.vctr/.exec(pathname);
+        const contentTmsMatch = /content\/([\w_\d-]+\/)?([0-9]+)__([0-9]+)_([0-9]+)\.vctr/.exec(pathname);
         if (contentTmsMatch) {
+            const dataset = (contentTmsMatch[1] || 'labels').replace('/', '');
             const [z, x, y] = [
-                parseInt(contentTmsMatch[1]), 
                 parseInt(contentTmsMatch[2]), 
-                parseInt(contentTmsMatch[3])
+                parseInt(contentTmsMatch[3]), 
+                parseInt(contentTmsMatch[4])
             ];
-            const cityPoints = [];
-            const tile = dataTree.collectPointsForTile({x, y, z}, cityPoints);
-
-            const tbb = num2box(x, y, z);
-            const rectangle = new Rectangle(tbb.minx, tbb.miny, tbb.maxx, tbb.maxy);
-            const cartoPositions = cityPoints.map(p => Cartographic.fromDegrees(p.lon, p.lat, p.ele));
-            const titles = cityPoints.map(p => p.name);
-            const sizes = cityPoints.map(p => p.size);
-
-            const buff = encodeTile(rectangle, cartoPositions, titles, sizes);
-
-            response.setHeader('Access-Control-Allow-Origin', '*');
-            response.setHeader('Content-type', 'application/octet-stream' );
-
-            response.write(buff, undefined, () => {
-                response.end();
-            });
+            
+            serveContent(response, {x, y, z, dataset});
 
             return;
         }
         
-        const subtreeTmsMatch = /subtrees\/([0-9]+)\.([0-9]+)\.([0-9]+)\.subtree/.exec(pathname);
+        const subtreeTmsMatch = /subtrees\/([\w_\d-]+\/)?([0-9]+)\.([0-9]+)\.([0-9]+)\.subtree/.exec(pathname);
         if (subtreeTmsMatch) {
+            const dataset = (subtreeTmsMatch[1] || 'labels').replace('/', '');
             const [z, x, y] = [
-                parseInt(subtreeTmsMatch[1]), 
                 parseInt(subtreeTmsMatch[2]), 
-                parseInt(subtreeTmsMatch[3])
+                parseInt(subtreeTmsMatch[3]), 
+                parseInt(subtreeTmsMatch[4])
             ];
 
-            console.log(`get ${z}.${x}.${y} subtree`);
-
-            const tile = dataTree.traverseToTile({x, y, z});
-            if (!tile) {
-                response.statusCode = 404;
-                response.end(`File ${pathname} not found!`);
-                return;
-            }
-
-            const buff = encodeSubtree(tile, 3);
-
-            response.setHeader('Access-Control-Allow-Origin', '*');
-            response.setHeader('Content-type', 'application/octet-stream' );
-
-            response.write(buff, undefined, () => {
-                response.end();
-            });
+            serveSubtree(response, {x, y, z, dataset});
 
             return;
         }
@@ -137,4 +113,71 @@ export async function startServer(options) {
     server.listen(port, host, () => {
         console.log(`Server is running on http://${host}:${port}`);
     });
+}
+
+function serveContent(response, {x, y, z, dataset}) {
+    const dataTree = DATASETS[dataset];
+    if (!dataTree) {
+        return end404(response);
+    }
+
+    const cityPoints = [];
+    dataTree.collectPointsForTile({x, y, z}, cityPoints);
+
+    const tbb = num2box(x, y, z);
+    const rectangle = new Rectangle(tbb.minx, tbb.miny, tbb.maxx, tbb.maxy);
+    const positions = cityPoints.map(p => Cartographic.fromDegrees(p.lon, p.lat, p.ele));
+    const titles = cityPoints.map(p => p.name);
+    const sizes = cityPoints.map(p => p.size);
+
+    const points = {
+        positions,
+        length: cityPoints.length,
+    };
+
+    const attributes = [{
+        propertyName: "title",
+        values: titles,
+        binary: false
+    }, {
+        propertyName: "size",
+        values: sizes,
+        binary: false
+    }];
+
+    const buff = encodeTile(rectangle, attributes, {points});
+
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    response.setHeader('Content-type', 'application/octet-stream' );
+
+    response.write(buff, undefined, () => {
+        response.end();
+    });
+}
+
+function serveSubtree(response, {x, y, z, dataset}) {
+
+    const dataTree = DATASETS[dataset];
+    if (!dataTree) {
+        return end404(response);
+    }
+
+    const tile = dataTree.traverseToTile({x, y, z});
+    if (!tile) {
+        return end404(response);
+    }
+
+    const buff = encodeSubtree(tile, 3);
+
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    response.setHeader('Content-type', 'application/octet-stream' );
+
+    response.write(buff, undefined, () => {
+        response.end();
+    });
+}
+
+function end404(response) {
+    response.statusCode = 404;
+    response.end(`File not found!`);
 }

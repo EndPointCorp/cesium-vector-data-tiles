@@ -52,38 +52,75 @@ export class Cartographic {
 
 // https://github.com/CesiumGS/3d-tiles/tree/vctr/TileFormats/VectorData
 
-export function encodeTile(rectangle, cartoPositions, titles, sizes) {
+export function encodeTile(rectangle, attributes, {points, polylines}) {
     const version = 1;
     const maxHeight = 10000.0;
     const minHeight = 0.0;
 
-    const positions = encodePositions(
-        rectangle,
-        minHeight,
-        maxHeight,
-        cartoPositions,
-    );
-
     const featureTableHdr = {
         REGION: [rectangle.west, rectangle.south, rectangle.east, rectangle.north, minHeight, maxHeight],
-        POINTS_LENGTH: cartoPositions.length,
     };
+
+    if (points?.length) {
+        featureTableHdr['POINTS_LENGTH'] = points.length;
+    }
+
+    if (polylines?.length) {
+        featureTableHdr['POLYLINES_LENGTH'] = polylines.length;
+        featureTableHdr['POLYLINE_COUNTS'] = polylines.counts;
+    }
 
     const featureTableHdrJSON = JSON.stringify(featureTableHdr);
     const featureTableJSONPad = padStr(featureTableHdrJSON);
 
     // https://github.com/CesiumGS/3d-tiles/blob/vctr/TileFormats/BatchTable/README.md
-    const batchTableHdr = {
-        title: titles,
-    };
-    if (sizes) {
-        batchTableHdr['size'] = sizes;
+    const batchTableHdr = {};
+
+    for (const attr of attributes) {
+        batchTableHdr[attr.propertyName] = attr.values;
     }
+
     const batchTableHdrJSON = JSON.stringify(batchTableHdr);
     const batchTableHdrPad = padStr(batchTableHdrJSON);
 
+    var positionsPoints = new Uint16Array(0);
+    var positionsPolylines =  new Uint16Array(0);
+
+    if (points) {
+        positionsPoints = encodePositions(
+            rectangle,
+            minHeight,
+            maxHeight,
+            points.positions,
+        );
+    }
+    const positionsPointsU8 = new Uint8Array(positionsPoints.buffer, positionsPoints.byteOffset, positionsPoints.byteLength);
+    const positionsPointsPad = positionsPointsU8.byteLength % 4 !== 0 ? 4 - positionsPointsU8.byteLength % 4 : 0;
+    // The length of the point positions buffer in bytes.
+    const pointPositionsByteLength = positionsPointsU8.byteLength + positionsPointsPad;
+
+
+    if (polylines) {
+        positionsPolylines = encodePositions(
+            rectangle,
+            minHeight,
+            maxHeight,
+            polylines.positions,
+        );
+    }
+    const positionsPolylinesU8 = new Uint8Array(positionsPolylines.buffer, positionsPolylines.byteOffset, positionsPolylines.byteLength);
+    const positionsPolylinesPad = positionsPolylinesU8.byteLength % 4 !== 0 ? 4 - positionsPolylinesU8.byteLength % 4 : 0;
+    // The length of the polyline positions buffer in bytes.
+    const polylinePositionsByteLength = positionsPolylinesU8.byteLength + positionsPolylinesPad;
+
+
     // The length of the entire tile, including the header, in bytes.
-    const byteLength = 44 + positions.byteLength + lenb(featureTableJSONPad) + lenb(batchTableHdrPad); 
+    const byteLength = 44 + 
+        polylinePositionsByteLength + 
+        pointPositionsByteLength + 
+        lenb(featureTableJSONPad) + 
+        lenb(batchTableHdrPad);
+
     // The length of the feature table JSON section in bytes.
     const featureTableJSONByteLength = lenb(featureTableJSONPad);
     // The length of the feature table binary section in bytes. If featureTableJSONByteLength is zero, this will also be zero.
@@ -96,11 +133,7 @@ export function encodeTile(rectangle, cartoPositions, titles, sizes) {
     const polygonIndicesByteLength = 0;
     // The length of the polygon positions buffer in bytes.
     const polygonPositionsByteLength = 0;
-    // The length of the polyline positions buffer in bytes.
-    const polylinePositionsByteLength = 0;
-    // The length of the point positions buffer in bytes.
-    const pointPositionsByteLength = positions.byteLength;
-
+    
     const hdrBuff = Buffer.alloc(44);
     
     hdrBuff.write('vctr', 0); //magic
@@ -122,8 +155,12 @@ export function encodeTile(rectangle, cartoPositions, titles, sizes) {
 
     out.write(featureTableJSONPad);
     out.write(batchTableHdrPad);
-
-    out.write(new Uint8Array(positions.buffer, positions.byteOffset, positions.byteLength));
+    
+    out.write(positionsPointsU8);
+    out.write(new Uint8Array(positionsPointsPad));
+    
+    out.write(positionsPolylinesU8);
+    out.write(new Uint8Array(positionsPolylinesPad));
 
     return tileBuff;
 }

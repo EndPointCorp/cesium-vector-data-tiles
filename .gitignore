@@ -1,6 +1,6 @@
 data/*
 data/cities*.txt
-!data/pnts-implicit.json
+!data/*tset.json
 !data/*style*.json
 
 lib/cesium_*

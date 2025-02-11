@@ -16,14 +16,14 @@
             ]
         },
         "content": {
-            "uri": "content/{level}__{x}_{y}.vctr"
+            "uri": "content/labels/{level}__{x}_{y}.vctr"
         },
         "implicitTiling": {
             "subdivisionScheme": "QUADTREE",
             "availableLevels": 18,
             "subtreeLevels": 3,
             "subtrees": {
-                "uri": "subtrees/{level}.{x}.{y}.subtree"
+                "uri": "subtrees/labels/{level}.{x}.{y}.subtree"
             }
         }
     }

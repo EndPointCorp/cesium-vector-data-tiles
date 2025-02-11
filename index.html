@@ -33,9 +33,6 @@
     // from "/lib/Cesium/Build/CesiumUnminified/index.js"
     from "https://cesium.com/downloads/cesiumjs/releases/1.124/Build/CesiumUnminified/index.js"
 
-    const TSET_URL = "data/pnts-implicit.json";
-    const TSET_STYLE_URL = "data/city-labels-style.json";
-
     const models = createDefaultImageryProviderViewModels();
     const esriWorldImagery = models.find(p => p.name === 'ArcGIS World Imagery');
 
@@ -45,14 +42,17 @@
       msaaSamples: 1
     });
 
-    await addTileset();
+    await addTileset({
+      url: "data/labels-tset.json",
+      style: "data/city-labels-style.json"
+    });
 
-    async function addTileset() {
-      const response = await fetch(TSET_STYLE_URL);
+    async function addTileset({url, style: styleUrl}) {
+      const response = await fetch(styleUrl);
       const styleJson = await response.json();
       const style = new Cesium3DTileStyle(styleJson);
 
-      const tset = await Cesium3DTileset.fromUrl(TSET_URL);
+      const tset = await Cesium3DTileset.fromUrl(url);
 
       viewer.scene.primitives.add(tset);
       tset.style = style;
